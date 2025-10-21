@@ -1,4 +1,4 @@
-# 우리의 하루 (WeDay) - 커플 추억 아카이브
+# 커플 추억 APP (이름 미정)
 
 커플을 위한 D-Day, 사진 기록, 채팅, 여행 기록을 관리하는 웹 애플리케이션
 
@@ -25,7 +25,7 @@ my_app/
 │   ├── src/
 │   │   ├── app/       # 페이지 및 라우팅
 │   │   ├── components/ # 재사용 컴포넌트
-│   │   ├── store/     # Zustand 상태 관리
+│   │   ├── store/     
 │   │   └── api/       # API 호출 함수
 │   └── public/        # 정적 파일
 │
@@ -200,20 +200,3 @@ npm run dev
 cd backend
 ./mvnw spring-boot:run
 ```
-
-## 배포
-
-- Frontend: Vercel
-- Backend: AWS EC2
-- Database: AWS RDS (MySQL)
-- Storage: AWS S3
-
-## iOS 전환 전략
-
-1. **PWA** (단기): next-pwa로 홈화면 추가
-2. **React Native** (중기): Expo로 iOS 앱 개발
-3. **Capacitor** (대안): 웹뷰로 감싸기
-
-## 라이센스
-
-MIT
