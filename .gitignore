@@ -1,0 +1,19 @@
+# 민감한 파일들
+database/
+*.env
+.env.local
+.env.production
+config/secrets/
+*.log
+node_modules/
+.DS_Store
+
+# IDE 설정
+.vscode/
+.idea/
+
+# 빌드 파일
+dist/
+build/
+.next/
+out/
