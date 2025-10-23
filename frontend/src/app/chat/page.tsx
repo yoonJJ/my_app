@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import BottomNavigation from "@/components/BottomNavigation";
 
 export default function Chat() {
   const [messages] = useState([
@@ -21,10 +22,10 @@ export default function Chat() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-b from-pink-50 to-purple-50 flex flex-col pb-20">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-4 py-4">
-        <h1 className="text-2xl font-bold text-gray-900">채팅</h1>
+      <div className="bg-white/90 backdrop-blur-md border-b border-gray-200/50 px-4 py-4">
+        <h1 className="text-xl font-bold text-gray-900">채팅</h1>
       </div>
 
       {/* Messages */}
@@ -35,10 +36,10 @@ export default function Chat() {
             className={`flex ${message.sender === "나" ? "justify-end" : "justify-start"}`}
           >
             <div
-              className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+              className={`max-w-xs px-4 py-3 rounded-2xl ${
                 message.sender === "나"
-                  ? "bg-blue-600 text-white"
-                  : "bg-white border border-gray-200 text-gray-900"
+                  ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white"
+                  : "bg-white/80 backdrop-blur-sm border border-white/20 text-gray-900"
               }`}
             >
               <p className="text-sm">{message.content}</p>
@@ -51,23 +52,25 @@ export default function Chat() {
       </div>
 
       {/* Input */}
-      <div className="bg-white border-t border-gray-200 px-4 py-4">
+      <div className="bg-white/90 backdrop-blur-md border-t border-gray-200/50 px-4 py-4">
         <form onSubmit={handleSend} className="flex gap-2">
           <input
             type="text"
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             placeholder="메시지를 입력하세요..."
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 px-4 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white/80 backdrop-blur-sm"
           />
           <button
             type="submit"
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium"
+            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-2xl font-semibold shadow-lg"
           >
             전송
           </button>
         </form>
       </div>
+      
+      <BottomNavigation />
     </div>
   );
 }
