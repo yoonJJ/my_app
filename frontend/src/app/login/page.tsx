@@ -45,6 +45,8 @@ export default function Login() {
         localStorage.setItem("user", JSON.stringify({
           name: data.name,
           email: data.email,
+          matched: false, // 초기값은 false
+          inviteCode: "" // 초기값은 빈 문자열
         }));
         
         // 홈으로 이동

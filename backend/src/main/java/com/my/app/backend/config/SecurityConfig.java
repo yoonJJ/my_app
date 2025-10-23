@@ -56,6 +56,8 @@ public class SecurityConfig {
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers("/h2-console/**").permitAll()
                 .requestMatchers("/api/login", "/api/signup").permitAll()
+                .requestMatchers("/api/phone/**").permitAll() // 핸드폰 인증 API 허용
+                .requestMatchers("/api/email/**").permitAll() // 이메일 중복 확인 API 허용
                 .requestMatchers("/api/session").permitAll() // 세션 확인은 모두 허용
                 .requestMatchers("/api/**").authenticated()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()

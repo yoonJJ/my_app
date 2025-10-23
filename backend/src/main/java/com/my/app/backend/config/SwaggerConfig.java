@@ -18,6 +18,6 @@ public class SwaggerConfig {
                         .description("커플 D-Day 및 추억 아카이브 앱 API 문서")
                         .contact(new Contact()
                                 .name("개발팀")
-                                .email("dev@weday.com")));
+                                .email("dev@myday.com")));
     }
 }

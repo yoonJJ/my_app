@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 
 export default function Signup() {
@@ -21,6 +21,8 @@ export default function Signup() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [actualVerificationCode, setActualVerificationCode] = useState(""); // 실제 인증번호 저장
+  const [emailCheckStatus, setEmailCheckStatus] = useState<"idle" | "checking" | "available" | "duplicate">("idle");
+  const [timer, setTimer] = useState(0); // 타이머 (초)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -36,6 +38,42 @@ export default function Signup() {
       });
     }
     setError(""); // 입력 시 에러 메시지 초기화
+    
+    // 이메일 체크 상태 초기화
+    if (name === "email") {
+      setEmailCheckStatus("idle");
+    }
+  };
+
+  const handleCheckEmail = async () => {
+    if (!formData.email.trim()) {
+      setErrors({ ...errors, email: "이메일을 입력해주세요." });
+      return;
+    }
+
+    if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      setErrors({ ...errors, email: "올바른 이메일 형식을 입력해주세요." });
+      return;
+    }
+
+    setEmailCheckStatus("checking");
+
+    try {
+      const response = await fetch(`http://localhost:8081/api/email/check?email=${encodeURIComponent(formData.email)}`);
+      const data = await response.json();
+
+      if (data.available) {
+        setEmailCheckStatus("available");
+        setErrors({ ...errors, email: "" });
+      } else {
+        setEmailCheckStatus("duplicate");
+        setErrors({ ...errors, email: data.message });
+      }
+    } catch (error) {
+      console.error("Email check error:", error);
+      setEmailCheckStatus("idle");
+      alert("이메일 중복 확인에 실패했습니다.");
+    }
   };
 
   const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -67,17 +105,33 @@ export default function Signup() {
     }
 
     try {
-      // 6자리 인증번호 생성
-      const code = Math.floor(100000 + Math.random() * 900000).toString();
-      setActualVerificationCode(code);
-      
-      // 콘솔에 인증번호 출력
-      console.log("📱 인증번호:", code);
-      console.log("📱 인증번호를 입력하세요:", code);
-      
-      setIsVerificationSent(true);
-      setIsVerificationVerified(false); // 초기화
-      alert("인증번호가 전송되었습니다. 콘솔을 확인하세요!");
+      // 백엔드 API 호출
+      const response = await fetch("http://localhost:8081/api/phone/send-code", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          phoneNumber: formData.phoneNumber,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // 개발용: 콘솔에 인증번호 출력
+        console.log("인증번호:", data.verificationCode);
+        console.log("인증번호를 입력하세요:", data.verificationCode);
+        
+        setActualVerificationCode(data.verificationCode);
+        setIsVerificationSent(true);
+        setIsVerificationVerified(false); // 초기화
+        setVerificationCode(""); // 인증번호 입력란 초기화
+        setTimer(180); // 3분(180초) 타이머 시작
+        alert("인증번호가 전송되었습니다. 콘솔을 확인하세요!");
+      } else {
+        setErrors({ ...errors, phoneNumber: data.message });
+      }
     } catch (error) {
       console.error("Verification send error:", error);
       alert("인증번호 전송에 실패했습니다.");
@@ -91,24 +145,52 @@ export default function Signup() {
     }
 
     try {
-      console.log("입력한 인증번호:", verificationCode);
-      console.log("실제 인증번호:", actualVerificationCode);
-      
-      // 인증번호 비교
-      if (verificationCode === actualVerificationCode) {
-        console.log("✅ 인증 성공!");
+      // 백엔드 API 호출
+      const response = await fetch("http://localhost:8081/api/phone/verify-code", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          phoneNumber: formData.phoneNumber,
+          code: verificationCode,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        console.log("인증 성공!");
         setIsVerificationVerified(true);
+        setTimer(0); // 타이머 종료
         alert("인증이 완료되었습니다.");
       } else {
-        console.log("❌ 인증 실패!");
+        console.log("인증 실패:", data.message);
         setIsVerificationVerified(false);
-        alert("인증번호가 올바르지 않습니다.");
+        alert(data.message || "인증번호가 올바르지 않습니다.");
       }
     } catch (error) {
       console.error("Verification error:", error);
       alert("인증번호가 올바르지 않습니다.");
     }
   };
+
+  // 타이머 useEffect
+  useEffect(() => {
+    if (timer > 0 && !isVerificationVerified) {
+      const interval = setInterval(() => {
+        setTimer((prev) => {
+          if (prev <= 1) {
+            clearInterval(interval);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      
+      return () => clearInterval(interval);
+    }
+  }, [timer, isVerificationVerified]);
 
   const validateForm = () => {
     const newErrors: {[key: string]: string} = {};
@@ -121,6 +203,8 @@ export default function Signup() {
       newErrors.email = "이메일을 입력해주세요.";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "올바른 이메일 형식을 입력해주세요.";
+    } else if (emailCheckStatus !== "available") {
+      newErrors.email = "이메일 중복 확인을 해주세요.";
     }
 
     if (!formData.phoneNumber) {
@@ -264,22 +348,49 @@ export default function Signup() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
                   </svg>
                 </div>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={formData.email}
-                  onChange={handleChange}
-                  className={`w-full pl-12 pr-4 py-3.5 bg-gray-50 border-2 rounded-2xl text-gray-900 placeholder-gray-400 focus:outline-none focus:border-pink-400 focus:bg-white transition-all duration-200 ${
-                    errors.email ? 'border-red-300' : 'border-gray-200'
-                  }`}
-                  placeholder="이메일을 입력하세요"
-                />
+                <div className="flex gap-2">
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    required
+                    value={formData.email}
+                    onChange={handleChange}
+                    className={`flex-1 pl-12 pr-4 py-3.5 bg-gray-50 border-2 rounded-2xl text-gray-900 placeholder-gray-400 focus:outline-none focus:border-pink-400 focus:bg-white transition-all duration-200 ${
+                      errors.email 
+                        ? 'border-red-300' 
+                        : emailCheckStatus === 'available' 
+                          ? 'border-green-300 bg-green-50' 
+                          : 'border-gray-200'
+                    }`}
+                    placeholder="이메일을 입력하세요"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleCheckEmail}
+                    disabled={emailCheckStatus === "checking"}
+                    className={`px-4 py-2 text-sm font-semibold rounded-2xl transition-all duration-200 ${
+                      emailCheckStatus === "checking"
+                        ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                        : emailCheckStatus === "available"
+                          ? 'bg-green-500 text-white cursor-not-allowed'
+                          : 'bg-blue-500 text-white hover:bg-blue-600 hover:shadow-lg'
+                    }`}
+                  >
+                    {emailCheckStatus === "checking" 
+                      ? "확인중..." 
+                      : emailCheckStatus === "available" 
+                        ? "✓" 
+                        : "중복확인"}
+                  </button>
+                </div>
               </div>
               {errors.email && (
                 <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+              )}
+              {emailCheckStatus === "available" && (
+                <p className="mt-1 text-sm text-green-600">사용 가능한 이메일입니다.</p>
               )}
             </div>
 
@@ -303,8 +414,9 @@ export default function Signup() {
                     required
                     value={formData.phoneNumber}
                     onChange={handlePhoneNumberChange}
+                    disabled={isVerificationVerified}
                     className={`w-full pl-12 pr-4 py-3.5 bg-gray-50 border-2 rounded-2xl text-gray-900 placeholder-gray-400 focus:outline-none focus:border-pink-400 focus:bg-white transition-all duration-200 ${
-                      errors.phoneNumber ? 'border-red-300' : 'border-gray-200'
+                      errors.phoneNumber ? 'border-red-300' : isVerificationVerified ? 'border-green-300 bg-green-50 cursor-not-allowed' : 'border-gray-200'
                     }`}
                     placeholder="010-1234-5678"
                     maxLength={13}
@@ -366,6 +478,14 @@ export default function Signup() {
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                     </svg>
                     핸드폰 번호 인증이 완료되었습니다.
+                  </p>
+                )}
+                {timer > 0 && !isVerificationVerified && (
+                  <p className="mt-2 text-sm text-gray-600 flex items-center">
+                    <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                    </svg>
+                    남은 시간: {Math.floor(timer / 60)}:{String(timer % 60).padStart(2, '0')}
                   </p>
                 )}
               </div>

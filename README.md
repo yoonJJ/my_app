@@ -48,8 +48,16 @@ my_app/
     │   │   ├── controller/SignupController.java
     │   │   ├── service/SignupService.java
     │   │   └── dto/     # SignupRequest, SignupResponse
+    │   ├── couple/      # 커플 관리 관련
+    │   │   ├── controller/CoupleController.java
+    │   │   ├── service/CoupleService.java
+    │   │   └── dto/     # MatchRequest, MatchResponse, SetDateRequest, SetNicknameRequest 등
     │   └── user/        # 사용자 엔티티
     │       ├── User.java
+    │       ├── Couple.java
+    │       ├── CoupleRepository.java
+    │       ├── PhoneVerification.java
+    │       ├── PhoneVerificationRepository.java
     │       ├── UserRepository.java
     │       └── UserDetailsServiceImpl.java
     └── src/main/resources/
@@ -63,9 +71,11 @@ my_app/
 - [x] 회원가입 / 로그인 (세션 기반 인증)
 - [x] BCrypt 비밀번호 암호화
 - [x] 세션 관리 및 유지
-- [ ] 커플 코드로 연결
+- [x] 커플 코드로 연결
+- [x] 기념일 설정
+- [x] 애칭 설정
+- [x] D-Day 계산 및 표시
 - [ ] 프로필 관리
-- [ ] D-Day 계산 및 표시
 
 ### 2. 사진 기록
 - [ ] 날짜별 앨범 생성
@@ -118,6 +128,26 @@ CREATE TABLE phone_verifications (
 );
 ```
 
+### Couples (커플)
+```sql
+CREATE TABLE couples (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user1_id BIGINT NOT NULL,
+    user2_id BIGINT,
+    nickname_for_user1 VARCHAR(50),
+    nickname_for_user2 VARCHAR(50),
+    status ENUM('WAITING', 'CONNECTED', 'BLOCKED') DEFAULT 'WAITING',
+    start_date DATE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user1_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (user2_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+ALTER TABLE users ADD COLUMN invite_code CHAR(8) UNIQUE;
+ALTER TABLE users ADD COLUMN couple_id BIGINT;
+ALTER TABLE users ADD CONSTRAINT fk_users_couple FOREIGN KEY (couple_id) REFERENCES couples(id) ON DELETE SET NULL;
+```
+
 ## API 엔드포인트
 
 ### 인증
@@ -125,6 +155,17 @@ CREATE TABLE phone_verifications (
 - `POST /api/signup` - 회원가입
 - `GET /api/session` - 세션 확인
 - `POST /api/logout` - 로그아웃
+
+### 회원가입
+- `GET /api/email/check?email={email}` - 이메일 중복 확인
+- `POST /api/phone/send-code` - 핸드폰 인증번호 전송
+- `POST /api/phone/verify-code` - 핸드폰 인증번호 확인
+
+### 커플 관리
+- `POST /api/couple/match` - 초대 코드로 커플 매칭
+- `GET /api/couple/info` - 커플 정보 조회
+- `POST /api/couple/set-date` - 기념일 설정
+- `POST /api/couple/set-nickname` - 애칭 설정
 
 ### Swagger UI
 - `http://localhost:8081/swagger-ui.html` - API 문서 확인
@@ -154,18 +195,25 @@ CREATE TABLE phone_verifications (
 - **쿠키 기반 세션 관리**
 - **CSRF 비활성화 (개발 환경)**
 
-## 테스트 계정
+### 5. 커플 매칭
+- **초대 코드 기반 매칭**
+- **8자리 랜덤 초대 코드 생성**
+- **WAITING 상태 관리** (한쪽이 먼저 초대한 경우)
+- **CONNECTED 상태로 자동 전환** (양쪽 모두 매칭 완료)
+- **기념일 설정** (만난 날짜)
+- **애칭 설정** (상대방을 부르는 애칭)
+- **D-Day 자동 계산** (기념일로부터 경과 일수)
 
-테스트를 위해 다음 계정이 미리 등록되어 있습니다:
-
-| 이메일 | 비밀번호 | 이름 |
-|--------|----------|------|
-| jeongjae124@test.com | 123123 | 정재 |
-| haeun123@test.com | 123123 | 하은 |
+### 6. 회원가입 개선
+- **이메일 중복 확인** (실시간 검증)
+- **핸드폰 번호 인증** (6자리 인증번호)
+- **인증번호 유효시간 3분**
+- **실시간 타이머 표시**
+- **입력 필드 비활성화** (인증 완료 후)
 
 ## 개발 로드맵
 
-### Phase 1: 기본 구조 ✅
+### Phase 1: 기본 구조
 - [x] Next.js 프로젝트 생성
 - [x] 메인 페이지 (D-Day 계산)
 - [x] 로그인/회원가입 페이지
@@ -177,7 +225,10 @@ CREATE TABLE phone_verifications (
 
 ### Phase 2: 백엔드 API (진행 중)
 - [x] 세션 관리 API
-- [ ] 커플 관리 API
+- [x] 커플 관리 API
+- [x] 초대 코드 매칭
+- [x] 기념일 설정
+- [x] 애칭 설정
 - [ ] 사진 업로드 API
 - [ ] 채팅 WebSocket
 - [ ] 여행 기록 API
@@ -186,6 +237,10 @@ CREATE TABLE phone_verifications (
 - [x] 회원가입 페이지
 - [x] 로그인 페이지
 - [x] 세션 확인 기능
+- [x] 커플 매칭 화면
+- [x] 기념일 설정 화면
+- [x] 애칭 설정 화면
+- [x] D-Day 표시 화면
 - [ ] 사진 앨범 페이지
 - [ ] 채팅 페이지
 - [ ] 여행 기록 페이지
@@ -267,7 +322,7 @@ cd backend
 
 ## 향후 계획
 
-1. **커플 연결 기능**: 초대 코드 기반으로 커플 연결
+1. **커플 연결 기능**: 초대 코드 기반으로 커플 연결 (완료)
 2. **사진 업로드**: 파일 업로드 및 S3 연동
 3. **실시간 채팅**: WebSocket 구현
 4. **여행 기록**: 지도 API 연동

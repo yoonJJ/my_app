@@ -58,6 +58,12 @@ public class LoginController {
             if (user.isPresent()) {
                 response.setName(user.get().getName());
                 response.setEmail(user.get().getEmail());
+                
+                // 커플 매칭 여부 확인 (couple_id가 null이 아니면 매칭됨)
+                response.setMatched(user.get().getCoupleId() != null);
+                
+                // 본인의 초대 코드 설정
+                response.setInviteCode(user.get().getInviteCode());
             }
         } else {
             response.setAuthenticated(false);

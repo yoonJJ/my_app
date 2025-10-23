@@ -1,5 +1,6 @@
 # 민감한 파일들
 database/
+dbimg/
 *.env
 .env.local
 .env.production
