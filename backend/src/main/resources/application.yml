@@ -1,0 +1,40 @@
+spring:
+  application:
+    name: backend
+  
+  # H2 Database Configuration (for testing)
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+  
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.H2Dialect
+    database-platform: org.hibernate.dialect.H2Dialect
+    defer-datasource-initialization: true
+  
+  # Session Configuration
+  session:
+    store-type: none
+    timeout: 30m
+    cookie:
+      name: JSESSIONID
+      path: /
+      http-only: true
+      secure: false
+      same-site: lax
+
+server:
+  port: 8081

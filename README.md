@@ -11,11 +11,13 @@
 
 ### Backend
 - **Java 21**
-- **Spring Boot 3.x**
-- **Spring Security** (JWT 인증)
+- **Spring Boot 3.5.6**
+- **Spring Security** (세션 기반 인증)
 - **Spring WebSocket** (실시간 채팅)
-- **MySQL** (데이터베이스)
-- **개인용 미니pc** (파일 저장소)
+- **Spring Data JPA**
+- **H2 Database** (개발/테스트용)
+- **MySQL** (운영용, MariaDB)
+- **Swagger UI** (API 문서화)
 
 ## 프로젝트 구조
 
@@ -24,152 +26,166 @@ my_app/
 ├── frontend/          # Next.js 프론트엔드
 │   ├── src/
 │   │   ├── app/       # 페이지 및 라우팅
+│   │   │   ├── page.tsx       # 홈 페이지
+│   │   │   ├── login/         # 로그인 페이지
+│   │   │   └── signup/        # 회원가입 페이지
 │   │   ├── components/ # 재사용 컴포넌트
-│   │   ├── store/     
-│   │   └── api/       # API 호출 함수
+│   │   │   └── BottomNavigation.tsx
+│   │   └── lib/      # 유틸리티 함수
+│   │       └── constants.ts
 │   └── public/        # 정적 파일
 │
 └── backend/           # Spring Boot 백엔드
-    ├── src/main/java/
-    │   ├── controller/ # REST API 컨트롤러
-    │   ├── service/    # 비즈니스 로직
-    │   ├── repository/ # 데이터베이스 접근
-    │   ├── entity/     # 엔티티 모델
-    │   ├── dto/        # 데이터 전송 객체
-    │   └── config/     # 설정 파일
+    ├── src/main/java/com/my/app/backend/
+    │   ├── config/      # 설정 파일
+    │   │   ├── SecurityConfig.java    # Spring Security 설정
+    │   │   └── SwaggerConfig.java     # Swagger UI 설정
+    │   ├── login/       # 로그인 관련
+    │   │   ├── controller/LoginController.java
+    │   │   ├── service/LoginService.java
+    │   │   └── dto/     # LoginRequest, LoginResponse, SessionResponse
+    │   ├── signup/      # 회원가입 관련
+    │   │   ├── controller/SignupController.java
+    │   │   ├── service/SignupService.java
+    │   │   └── dto/     # SignupRequest, SignupResponse
+    │   └── user/        # 사용자 엔티티
+    │       ├── User.java
+    │       ├── UserRepository.java
+    │       └── UserDetailsServiceImpl.java
     └── src/main/resources/
-        └── application.yml
+        ├── application.yml
+        └── data.sql           # 초기 테스트 데이터
 ```
 
 ## 핵심 기능
 
 ### 1. 회원 및 커플 관리
-- 회원가입 / 로그인 (JWT 인증)
-- 커플 코드로 연결
-- 프로필 관리
-- D-Day 계산 및 표시
+- [x] 회원가입 / 로그인 (세션 기반 인증)
+- [x] BCrypt 비밀번호 암호화
+- [x] 세션 관리 및 유지
+- [ ] 커플 코드로 연결
+- [ ] 프로필 관리
+- [ ] D-Day 계산 및 표시
 
 ### 2. 사진 기록
-- 날짜별 앨범 생성
-- 사진 업로드
-- 캡션 및 태그 추가
-- 타임라인 뷰
+- [ ] 날짜별 앨범 생성
+- [ ] 사진 업로드
+- [ ] 캡션 및 태그 추가
+- [ ] 타임라인 뷰
 
 ### 3. 실시간 채팅
-- WebSocket 기반 실시간 대화
-- 채팅 히스토리 저장
-- 읽음 표시
+- [ ] WebSocket 기반 실시간 대화
+- [ ] 채팅 히스토리 저장
+- [ ] 읽음 표시
 
 ### 4. 여행 기록
-- 지도 기반 위치 기록
-- 방문 장소 마커
-- 사진 및 메모 첨부
-- 날짜별 정렬
+- [ ] 지도 기반 위치 기록
+- [ ] 방문 장소 마커
+- [ ] 사진 및 메모 첨부
+- [ ] 날짜별 정렬
 
 ### 5. 타임라인
-- 통합 추억 뷰
-- 날짜순 정렬
-- 사진 + 채팅 + 여행 통합 표시
+- [ ] 통합 추억 뷰
+- [ ] 날짜순 정렬
+- [ ] 사진 + 채팅 + 여행 통합 표시
 
 ## 데이터베이스 스키마
 
 ### Users (사용자)
 ```sql
-- id (PK)
-- email
-- password (암호화)
-- name
-- profile_image_url
-- created_at
+CREATE TABLE users (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    email VARCHAR(255) UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    phone_number VARCHAR(20) UNIQUE,
+    phone_verified BOOLEAN DEFAULT FALSE,
+    profile_image_url VARCHAR(500),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 ```
 
-### Couples (커플)
+### Phone_Verifications (핸드폰 인증)
 ```sql
-- id (PK)
-- user1_id (FK)
-- user2_id (FK)
-- start_date (만난 날)
-- status
-- created_at
-```
-
-### Photos (사진)
-```sql
-- id (PK)
-- couple_id (FK)
-- image_url (S3)
-- caption
-- location
-- created_at
-```
-
-### Messages (채팅)
-```sql
-- id (PK)
-- couple_id (FK)
-- sender_id (FK)
-- content
-- created_at
-```
-
-### Travels (여행)
-```sql
-- id (PK)
-- couple_id (FK)
-- title
-- location_name
-- latitude
-- longitude
-- date
-- memo
-- image_url
+CREATE TABLE phone_verifications (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    phone_number VARCHAR(20) NOT NULL,
+    code VARCHAR(6) NOT NULL,
+    verified BOOLEAN DEFAULT FALSE,
+    expires_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_phone_number (phone_number)
+);
 ```
 
 ## API 엔드포인트
 
 ### 인증
-- `POST /api/auth/signup` - 회원가입
-- `POST /api/auth/login` - 로그인
-- `POST /api/auth/logout` - 로그아웃
+- `POST /api/login` - 로그인 (세션 생성)
+- `POST /api/signup` - 회원가입
+- `GET /api/session` - 세션 확인
+- `POST /api/logout` - 로그아웃
 
-### 커플
-- `POST /api/couple/invite` - 커플 초대
-- `GET /api/couple/info` - 커플 정보 조회
-- `PUT /api/couple/start-date` - 만난 날 수정
+### Swagger UI
+- `http://localhost:8081/swagger-ui.html` - API 문서 확인
 
-### 사진
-- `GET /api/photos` - 사진 목록 조회
-- `POST /api/photos` - 사진 업로드
-- `DELETE /api/photos/:id` - 사진 삭제
+## 구현된 기능 상세
 
-### 채팅
-- `GET /api/chat/messages` - 채팅 내역 조회
-- WebSocket: `/ws/chat` - 실시간 채팅
+### 1. 회원가입
+- **이메일/전화번호 중복 체크**
+- **BCrypt 비밀번호 암호화**
+- **핸드폰 번호 인증 (UI만 구현됨)**
+- **회원가입 성공 시 로그인 페이지로 이동**
 
-### 여행
-- `GET /api/travels` - 여행 기록 조회
-- `POST /api/travels` - 여행 기록 추가
-- `PUT /api/travels/:id` - 여행 기록 수정
+### 2. 로그인
+- **세션 기반 인증**
+- **Spring Security AuthenticationManager 사용**
+- **쿠키 기반 세션 관리 (JSESSIONID)**
+- **로그인 성공 시 홈페이지로 이동**
 
-### 타임라인
-- `GET /api/timeline` - 통합 타임라인 조회
+### 3. 세션 관리
+- **세션 자동 생성 및 유지**
+- **세션 확인 API (`GET /api/session`)**
+- **프론트엔드에서 세션 상태 확인**
+- **로그인 상태에 따른 UI 표시**
+
+### 4. 보안 설정
+- **CORS 설정 (http://localhost:3000 허용)**
+- **쿠키 기반 세션 관리**
+- **CSRF 비활성화 (개발 환경)**
+
+## 테스트 계정
+
+테스트를 위해 다음 계정이 미리 등록되어 있습니다:
+
+| 이메일 | 비밀번호 | 이름 |
+|--------|----------|------|
+| jeongjae124@test.com | 123123 | 정재 |
+| haeun123@test.com | 123123 | 하은 |
 
 ## 개발 로드맵
 
-### Phase 1: 기본 구조 (현재)
+### Phase 1: 기본 구조 ✅
 - [x] Next.js 프로젝트 생성
 - [x] 메인 페이지 (D-Day 계산)
 - [x] 로그인/회원가입 페이지
-- [ ] Spring Boot 프로젝트 생성
+- [x] Spring Boot 프로젝트 생성
+- [x] Swagger UI 설정
+- [x] 인증 시스템 (세션 기반)
+- [x] 회원가입 API
+- [x] 로그인 API
 
-### Phase 2: 백엔드 API
-- [ ] 인증 API (JWT)
+### Phase 2: 백엔드 API (진행 중)
+- [x] 세션 관리 API
 - [ ] 커플 관리 API
 - [ ] 사진 업로드 API
 - [ ] 채팅 WebSocket
 - [ ] 여행 기록 API
 
 ### Phase 3: 프론트엔드 기능
+- [x] 회원가입 페이지
+- [x] 로그인 페이지
+- [x] 세션 확인 기능
 - [ ] 사진 앨범 페이지
 - [ ] 채팅 페이지
 - [ ] 여행 기록 페이지
@@ -194,9 +210,65 @@ cd frontend
 npm install
 npm run dev
 ```
+프론트엔드는 `http://localhost:3000` 에서 실행됩니다.
 
 ### Backend
 ```bash
 cd backend
-./mvnw spring-boot:run
+./gradlew bootRun
 ```
+백엔드는 `http://localhost:8081`에서 실행됩니다.
+
+### 데이터베이스
+- **H2 Console**: `http://localhost:8081/h2-console`
+- **JDBC URL**: `jdbc:h2:mem:testdb`
+- **Username**: `sa`
+- **Password**: (비어있음)
+
+### Swagger UI
+- **URL**: `http://localhost:8081/swagger-ui.html`
+
+## 주요 기술 구현
+
+### 1. 세션 기반 인증
+- Spring Security의 `HttpSession` 사용
+- 로그인 시 세션 생성 및 쿠키 설정
+- 각 요청마다 세션 쿠키로 인증 확인
+
+### 2. BCrypt 비밀번호 암호화
+- Spring Security의 `BCryptPasswordEncoder` 사용
+- 비밀번호 저장 시 자동 해싱
+- 로그인 시 해시 비교
+
+### 3. CORS 설정
+- 프론트엔드(`http://localhost:3000`) 허용
+- 쿠키 포함 요청 허용 (`credentials: true`)
+- 세션 API 공개 접근 허용
+
+### 4. UI/UX
+- 모던하고 깔끔한 디자인
+- 그라데이션 제거, 단색 사용
+- 반응형 디자인 (모바일/데스크톱)
+- 로딩 상태 및 에러 메시지 표시
+
+## 문제 해결
+
+### 세션 생성 문제
+- **문제**: 로그인 후 세션이 생성되지 않음
+- **해결**: `HttpSession`을 명시적으로 생성하고 `SecurityContext`를 저장
+
+### CORS 에러
+- **문제**: 프론트엔드에서 API 호출 시 CORS 에러 발생
+- **해결**: `CorsConfigurationSource` Bean 추가 및 설정
+
+### 비밀번호 불일치
+- **문제**: 로그인 시 비밀번호가 일치하지 않음
+- **해결**: BCrypt 해시 재생성 및 `data.sql` 업데이트
+
+## 향후 계획
+
+1. **커플 연결 기능**: 초대 코드 기반으로 커플 연결
+2. **사진 업로드**: 파일 업로드 및 S3 연동
+3. **실시간 채팅**: WebSocket 구현
+4. **여행 기록**: 지도 API 연동
+5. **타임라인**: 통합 추억 뷰
