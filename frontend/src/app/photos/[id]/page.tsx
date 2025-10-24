@@ -8,6 +8,7 @@ export default function PhotoDetail() {
   const router = useRouter();
   const params = useParams();
   const [user, setUser] = useState<{name: string, email: string, matched: boolean, inviteCode: string} | null>(null);
+  const [isChecking, setIsChecking] = useState(true);
   
   // 임시 데이터
   const [photo, setPhoto] = useState({
@@ -43,10 +44,16 @@ export default function PhotoDetail() {
             matched: data.matched,
             inviteCode: data.inviteCode
           });
+          setIsChecking(false);
+        } else {
+          router.push("/login");
         }
+      } else {
+        router.push("/login");
       }
     } catch (error) {
       console.error("세션 확인 실패:", error);
+      router.push("/login");
     }
   };
 
@@ -61,6 +68,10 @@ export default function PhotoDetail() {
       router.push("/photos");
     }
   };
+
+  if (isChecking) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20 md:pb-6">

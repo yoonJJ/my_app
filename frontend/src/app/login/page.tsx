@@ -75,8 +75,10 @@ export default function Login() {
         {/* 로고/타이틀 영역 */}
         <div className="text-center mb-8">
           <div className="inline-block mb-4">
-            <div className="w-20 h-20 md:w-24 md:h-24 bg-pink-500 rounded-3xl flex items-center justify-center shadow-xl transform rotate-3 hover:rotate-0 transition-transform duration-300">
-              <span className="text-4xl md:text-5xl">💕</span>
+            <div className="w-20 h-20 md:w-24 md:h-24 bg-gradient-to-br from-pink-500 to-purple-500 rounded-3xl flex items-center justify-center shadow-xl transform rotate-3 hover:rotate-0 transition-transform duration-300">
+              <svg className="w-10 h-10 md:w-12 md:h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
             </div>
           </div>
           <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">

@@ -1,17 +1,43 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import BottomNavigation from "@/components/BottomNavigation";
 
 export default function Settings() {
+  const router = useRouter();
   const [isEditingDate, setIsEditingDate] = useState(false);
   const [startDate, setStartDate] = useState("");
   const [coupleInfo, setCoupleInfo] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
+    checkSession();
     loadCoupleInfo();
   }, []);
+
+  const checkSession = async () => {
+    try {
+      const response = await fetch("http://localhost:8081/api/session", {
+        credentials: "include"
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (!data.authenticated) {
+          router.push("/login");
+        } else {
+          setIsChecking(false);
+        }
+      } else {
+        router.push("/login");
+      }
+    } catch (error) {
+      console.error("세션 확인 실패:", error);
+      router.push("/login");
+    }
+  };
 
   const loadCoupleInfo = async () => {
     try {
@@ -82,6 +108,10 @@ export default function Settings() {
       setStartDate(coupleInfo.startDate);
     }
   };
+
+  if (isChecking) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-pink-50 to-purple-50 pb-20 md:pb-6">

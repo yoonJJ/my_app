@@ -7,6 +7,7 @@ import BottomNavigation from "@/components/BottomNavigation";
 export default function Photos() {
   const router = useRouter();
   const [user, setUser] = useState<{name: string, email: string, matched: boolean, inviteCode: string} | null>(null);
+  const [isChecking, setIsChecking] = useState(true);
   
   const [photos] = useState([
     { id: 1, url: "/placeholder.jpg", caption: "첫 만남", date: "2024-01-15" },
@@ -33,10 +34,16 @@ export default function Photos() {
             matched: data.matched,
             inviteCode: data.inviteCode
           });
+          setIsChecking(false);
+        } else {
+          router.push("/login");
         }
+      } else {
+        router.push("/login");
       }
     } catch (error) {
       console.error("세션 확인 실패:", error);
+      router.push("/login");
     }
   };
 
@@ -47,6 +54,10 @@ export default function Photos() {
   const handlePhotoClick = (id: number) => {
     router.push(`/photos/${id}`);
   };
+
+  if (isChecking) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-pink-50 to-purple-50 pb-20">

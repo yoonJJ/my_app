@@ -353,8 +353,35 @@ function SetNicknameView({ onSuccess }: { onSuccess: () => void }) {
 
 // D-Day 표시 컴포넌트
 function DdayDisplay({ days }: { days: number }) {
+  const [displayDays, setDisplayDays] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    // 컴포넌트가 마운트되면 페이드인 효과
+    setIsVisible(true);
+    
+    // 숫자 카운트업 효과
+    const duration = 2000; // 2초 동안 카운트업
+    const steps = 60;
+    const increment = days / steps;
+    const stepDuration = duration / steps;
+    
+    let current = 0;
+    const timer = setInterval(() => {
+      current += increment;
+      if (current >= days) {
+        setDisplayDays(days);
+        clearInterval(timer);
+      } else {
+        setDisplayDays(Math.floor(current));
+      }
+    }, stepDuration);
+
+    return () => clearInterval(timer);
+  }, [days]);
+
   return (
-    <div className="mb-8">
+    <div className={`mb-8 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
       <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl p-8 border border-white/20 md:max-w-2xl md:mx-auto">
         <div className="flex flex-col items-center mb-6">
           {/* D-Day Circle */}
@@ -377,13 +404,13 @@ function DdayDisplay({ days }: { days: number }) {
                 strokeWidth="8"
                 fill="none"
                 strokeDasharray={`${2 * Math.PI * 70}`}
-                strokeDashoffset={`${2 * Math.PI * 70 * (1 - Math.min(days / 365, 1))}`}
+                strokeDashoffset={`${2 * Math.PI * 70 * (1 - Math.min(displayDays / 365, 1))}`}
                 className="text-pink-500 transition-all duration-1000 ease-out"
                 strokeLinecap="round"
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-4xl font-black text-gray-900 md:text-5xl">D+{days}</span>
+              <span className="text-4xl font-black text-gray-900 md:text-5xl transition-all duration-100">D+{displayDays}</span>
               <span className="text-sm text-gray-500 font-medium md:text-base">일째</span>
             </div>
           </div>

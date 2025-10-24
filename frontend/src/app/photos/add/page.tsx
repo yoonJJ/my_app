@@ -1,10 +1,38 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export default function AddPhoto() {
   const router = useRouter();
+  const [isChecking, setIsChecking] = useState(true);
+  
+  useEffect(() => {
+    checkSession();
+  }, []);
+
+  const checkSession = async () => {
+    try {
+      const response = await fetch("http://localhost:8081/api/session", {
+        credentials: "include"
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (!data.authenticated) {
+          router.push("/login");
+        } else {
+          setIsChecking(false);
+        }
+      } else {
+        router.push("/login");
+      }
+    } catch (error) {
+      console.error("세션 확인 실패:", error);
+      router.push("/login");
+    }
+  };
+
   const [formData, setFormData] = useState({
     caption: "",
     date: new Date().toISOString().split('T')[0],
@@ -24,6 +52,10 @@ export default function AddPhoto() {
   const handleCancel = () => {
     router.push("/photos");
   };
+
+  if (isChecking) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20 md:pb-6">

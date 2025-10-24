@@ -18,6 +18,11 @@ export default function Navbar() {
     return () => { document.body.style.overflow = 'unset'; };
   }, [isMenuOpen]);
 
+  // 채팅 페이지에서는 Navbar 숨기기
+  if (pathname === '/chat') {
+    return null;
+  }
+
   return (
     <>
       <nav className="bg-gradient-to-r from-pink-50 via-purple-50 to-pink-50 backdrop-blur-md border-b border-pink-200/50 sticky top-0 z-50">

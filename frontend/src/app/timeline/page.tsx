@@ -1,10 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import BottomNavigation from "@/components/BottomNavigation";
 
 export default function Timeline() {
+  const router = useRouter();
   const [user, setUser] = useState<{name: string, email: string, matched: boolean, inviteCode: string} | null>(null);
+  const [isChecking, setIsChecking] = useState(true);
   
   const [events] = useState([
     { id: 1, type: "photo", title: "첫 만남", date: "2024-01-15", content: "사진 1장" },
@@ -32,10 +35,16 @@ export default function Timeline() {
             matched: data.matched,
             inviteCode: data.inviteCode
           });
+          setIsChecking(false);
+        } else {
+          router.push("/login");
         }
+      } else {
+        router.push("/login");
       }
     } catch (error) {
       console.error("세션 확인 실패:", error);
+      router.push("/login");
     }
   };
 
@@ -64,6 +73,10 @@ export default function Timeline() {
         return "bg-gray-100 text-gray-600";
     }
   };
+
+  if (isChecking) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20 md:pb-6">
