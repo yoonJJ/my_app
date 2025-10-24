@@ -120,6 +120,14 @@ public class CoupleService {
         // 날짜 설정
         try {
             LocalDate date = LocalDate.parse(request.getDate());
+            
+            // 미래 날짜 체크
+            if (date.isAfter(LocalDate.now())) {
+                response.setSuccess(false);
+                response.setMessage("미래 날짜는 설정할 수 없습니다.");
+                return response;
+            }
+            
             couple.setStartDate(date);
             coupleRepository.save(couple);
 

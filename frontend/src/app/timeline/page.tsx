@@ -1,14 +1,43 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import BottomNavigation from "@/components/BottomNavigation";
 
 export default function Timeline() {
+  const [user, setUser] = useState<{name: string, email: string, matched: boolean, inviteCode: string} | null>(null);
+  
   const [events] = useState([
     { id: 1, type: "photo", title: "첫 만남", date: "2024-01-15", content: "사진 1장" },
     { id: 2, type: "chat", title: "대화", date: "2024-01-16", content: "안녕하세요!" },
     { id: 3, type: "travel", title: "제주도 여행", date: "2024-03-15", content: "첫 여행" },
     { id: 4, type: "photo", title: "데이트", date: "2024-04-20", content: "사진 3장" },
   ]);
+
+  useEffect(() => {
+    checkSession();
+  }, []);
+
+  const checkSession = async () => {
+    try {
+      const response = await fetch("http://localhost:8081/api/session", {
+        credentials: "include"
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.authenticated) {
+          setUser({
+            name: data.name,
+            email: data.email,
+            matched: data.matched,
+            inviteCode: data.inviteCode
+          });
+        }
+      }
+    } catch (error) {
+      console.error("세션 확인 실패:", error);
+    }
+  };
 
   const getTypeIcon = (type: string) => {
     switch (type) {
@@ -37,7 +66,7 @@ export default function Timeline() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 pb-20 md:pb-6">
       <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
@@ -81,6 +110,8 @@ export default function Timeline() {
           </div>
         )}
       </div>
+      
+      {user && user.matched && <BottomNavigation />}
     </div>
   );
 }

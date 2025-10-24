@@ -211,6 +211,23 @@ ALTER TABLE users ADD CONSTRAINT fk_users_couple FOREIGN KEY (couple_id) REFEREN
 - **실시간 타이머 표시**
 - **입력 필드 비활성화** (인증 완료 후)
 
+## 테스트 계정
+
+테스트를 위해 다음 계정이 미리 등록되어 있습니다:
+
+| 이메일 | 비밀번호 | 이름 | 초대 코드 | 상태 |
+|--------|----------|------|-----------|------|
+| jeongjae124@test.com | 123123 | 윤정재 | JJEONG01 | 미매칭 |
+| haeun123@test.com | 123123 | 이하은 | HAEUN01 | 미매칭 |
+| hyeri0508@test.com | 123123 | 유혜리 | HYERI01 | ✅ 매칭됨 (만난 날짜 있음) |
+| jeongjae1204@test.com | 123123 | 윤정재 | JEONG01 | ✅ 매칭됨 (만난 날짜 있음) |
+| jimin411@test.com | 123123 | 유지민 | JIMIN01 | ✅ 매칭됨 (만난 날짜 없음) |
+| minji123@test.com | 123123 | 김민지 | MINJI01 | ✅ 매칭됨 (만난 날짜 없음) |
+
+**참고**:
+- `hyeri0508@test.com`과 `jeongjae1204@test.com`은 이미 연결되었고 기념일이 설정되어 있습니다.
+- `jimin411@test.com`과 `minji123@test.com`은 이미 연결되었지만 기념일이 설정되지 않았습니다.
+
 ## 개발 로드맵
 
 ### Phase 1: 기본 구조
