@@ -12,17 +12,17 @@ INSERT INTO users (email, password_hash, name, phone_number, phone_verified, inv
 
 -- 커플 연결: karina411@test.com과 winter0101@test.com을 연결 (만난 날짜 있음)
 INSERT INTO couples (user1_id, user2_id, status, start_date, created_at) VALUES
-(3, 4, 'CONNECTED', '2024-01-01', CURRENT_TIMESTAMP);
+(3, 4, 'CONNECTED', '2020-11-17', CURRENT_TIMESTAMP);
 
 -- 각 사용자의 couple_id 업데이트
 UPDATE users SET couple_id = 1 WHERE email IN ('karina411@test.com', 'winter0101@test.com');
 
--- 커플 연결: wonyoung123@test.com과 youjin123@test.com을 연결 (만난 날짜 없음)
+-- 커플 연결: jeongjae124@test.com과 haeun123@test.com을 연결 (만난 날짜 없음)
 INSERT INTO couples (user1_id, user2_id, status, start_date, created_at) VALUES
-(5, 6, 'CONNECTED', NULL, CURRENT_TIMESTAMP);
+(1, 2, 'CONNECTED', NULL, CURRENT_TIMESTAMP);
 
 -- 각 사용자의 couple_id 업데이트
-UPDATE users SET couple_id = 2 WHERE email IN ('wonyoung123@test.com', 'youjin123@test.com');
+UPDATE users SET couple_id = 2 WHERE email IN ('jeongjae124@test.com', 'haeun123@test.com');
 
 -- fetch("http://localhost:8081/api/session", { credentials: "include" })
 --   .then(r => r.json())
