@@ -18,8 +18,8 @@ export default function Navbar() {
     return () => { document.body.style.overflow = 'unset'; };
   }, [isMenuOpen]);
 
-  // 채팅 페이지에서는 Navbar 숨기기
-  if (pathname === '/chat') {
+  // 채팅/일정 페이지에서는 Navbar 숨기기
+  if (pathname === '/chat' || pathname === '/schedule') {
     return null;
   }
 
@@ -28,15 +28,22 @@ export default function Navbar() {
       <nav className="bg-gradient-to-r from-pink-50 via-purple-50 to-pink-50 backdrop-blur-md border-b border-pink-200/50 sticky top-0 z-50">
         <div className="px-4 py-3 md:px-8 md:py-4">
           <div className="flex items-center justify-between">
-            {/* Logo */}
-            <Link href="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-purple-500 rounded-lg flex items-center justify-center">
-                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <span className="text-lg md:text-xl font-bold text-gray-900">{APP_CONFIG.name}</span>
-            </Link>
+            {/* Logo & Beta Badge */}
+            <div className="flex items-center gap-3">
+              <Link href="/" className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-purple-500 rounded-lg flex items-center justify-center">
+                  <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <span className="text-lg md:text-xl font-bold text-gray-900">{APP_CONFIG.name}</span>
+              </Link>
+              
+              {/* Beta Badge */}
+              <span className="beta-badge inline-block px-3 py-1 text-xs font-semibold text-gray-600 rounded-full border border-gray-300 hover:border-gray-400 transition-all duration-300 cursor-default">
+                beta
+              </span>
+            </div>
             
             {/* Hamburger Menu Button (Desktop Only) */}
             <button

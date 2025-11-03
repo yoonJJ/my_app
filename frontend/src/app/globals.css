@@ -24,3 +24,22 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+@keyframes beta-float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+.beta-badge {
+  background: #fafafa;
+  animation: beta-float 3s ease-in-out infinite;
+}
+
+.beta-badge:hover {
+  background: #f5f5f5;
+  animation: none;
+}

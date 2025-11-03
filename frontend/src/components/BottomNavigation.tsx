@@ -11,7 +11,7 @@ export default function BottomNavigation() {
   const bottomMenuItems = [
     { href: '/', label: '홈', icon: 'home', color: 'pink' },
     { href: '/photos', label: '사진', icon: 'photos', color: 'blue' },
-    { href: '/chat', label: '채팅', icon: 'chat', color: 'green' },
+    { href: '/schedule', label: '일정', icon: 'schedule', color: 'purple' },
     { href: '/timeline', label: '타임라인', icon: 'timeline', color: 'orange' },
     { href: '/settings', label: '설정', icon: 'settings', color: 'gray' },
   ];
@@ -26,6 +26,14 @@ export default function BottomNavigation() {
       case 'gray': return 'text-gray-600 bg-gray-50';
       default: return 'text-gray-600 bg-gray-50';
     }
+  };
+
+  const getIconName = (icon: string) => {
+    // If icon is 'schedule' but not in ICON_PATHS, use calendar icon
+    if (icon === 'schedule') {
+      return 'schedule';
+    }
+    return icon;
   };
 
   return (
@@ -50,7 +58,7 @@ export default function BottomNavigation() {
                     strokeLinecap="round" 
                     strokeLinejoin="round" 
                     strokeWidth={2} 
-                    d={getIconPath(item.icon as keyof typeof ICON_PATHS)} 
+                    d={getIconPath(getIconName(item.icon) as keyof typeof ICON_PATHS)} 
                   />
                 </svg>
               </div>

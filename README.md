@@ -1,6 +1,6 @@
-# 커플 추억 APP (이름 미정)
+# 마이데이 (MyDay)
 
-커플을 위한 D-Day, 사진 기록, 채팅, 여행 기록을 관리하는 웹 애플리케이션
+커플을 위한 D-Day, 사진 기록, 일정 공유, 여행 기록을 관리하는 웹 애플리케이션
 
 ## 기술 스택
 
@@ -34,7 +34,8 @@ my_app/
 │   │   │   │   ├── page.tsx       # 사진 목록
 │   │   │   │   ├── add/           # 사진 추가
 │   │   │   │   └── [id]/          # 사진 상세
-│   │   │   ├── chat/          # 채팅 페이지
+│   │   │   ├── schedule/     # 일정 페이지 (캘린더)
+│   │   │   ├── travels/       # 여행 페이지
 │   │   │   └── settings/      # 설정 페이지
 │   │   ├── components/ # 재사용 컴포넌트
 │   │   │   ├── Navbar.tsx
@@ -93,13 +94,14 @@ my_app/
 - [ ] 캡션 및 태그 추가
 - [ ] 날짜별 정렬
 
-### 3. 채팅
-- [x] 채팅 페이지 UI
-- [x] 고정 헤더/푸터
-- [x] 메시지 리스트
-- [ ] WebSocket 기반 실시간 대화
-- [ ] 채팅 히스토리 저장
-- [ ] 읽음 표시
+### 3. 일정 관리 (캘린더)
+- [x] 캘린더 UI
+- [x] 일정 추가 모달
+- [x] 일정 목록 표시
+- [x] 날짜별 일정 필터링
+- [x] 일정 색상 구분
+- [x] 일정 추가/수정/삭제 API (세션 필요)
+- [ ] 일정 공유 기능
 
 ### 4. 여행 기록
 - [ ] 지도 기반 위치 기록
@@ -187,6 +189,14 @@ ALTER TABLE users ADD CONSTRAINT fk_users_couple FOREIGN KEY (couple_id) REFEREN
 - `POST /api/couple/set-date` - 기념일 설정
 - `POST /api/couple/set-nickname` - 애칭 설정
 
+### 일정 관리 (구현 완료)
+- `GET /api/schedules?from=YYYY-MM-DDTHH:mm:ss&to=YYYY-MM-DDTHH:mm:ss` - 기간별 일정 목록 조회
+- `POST /api/schedules` - 일정 추가
+- `GET /api/schedules/{id}` - 일정 상세
+- `PUT /api/schedules/{id}` - 일정 수정
+- `DELETE /api/schedules/{id}` - 일정 삭제
+  - 모든 요청은 로그인 후 세션 쿠키 필요 (프론트에서 `credentials: 'include'` 필수)
+
 ### Swagger UI
 - `http://localhost:8081/swagger-ui.html` - API 문서 확인
 
@@ -238,21 +248,22 @@ ALTER TABLE users ADD CONSTRAINT fk_users_couple FOREIGN KEY (couple_id) REFEREN
 
 ### 8. 내비게이션
 - **상단 Navbar**: 로고, 메뉴 (PC/모바일 대응)
-- **하단 BottomNavigation**: 홈, 타임라인, 사진, 채팅, 설정
+- **하단 BottomNavigation**: 홈, 사진, 일정, 타임라인, 설정
 - **모바일**: 햄버거 메뉴 사이드바
 - **PC**: 상단 메뉴 표시
-- **채팅 페이지**: Navbar 숨김 처리
+- **일정 페이지**: Navbar 숨김 처리
 
 ### 9. 사진 기능
 - **사진 목록**: 그리드 레이아웃
 - **사진 추가**: 업로드 영역, 제목, 날짜/시간, 위치, 메모 입력
 - **사진 상세**: 이미지 슬라이더, 상세 정보, 하단 그리드
 
-### 10. 채팅 기능
-- **고정 헤더**: 뒤로가기 버튼 + "채팅" 제목
-- **고정 푸터**: 입력란 + 전송 버튼
-- **메시지 리스트**: 나/상대방 구분 표시
-- **채팅 내용**: 샘플 메시지 16개
+### 10. 일정 기능
+- **캘린더 UI**: 월간 캘린더 뷰
+- **일정 추가**: 제목, 날짜, 시간, 위치, 설명 입력
+- **일정 표시**: 날짜별 일정 목록
+- **일정 필터링**: 선택된 날짜의 일정만 표시
+- **일정 색상**: 사용자별 색상 구분 (나/상대방)
 
 ### 11. 설정 기능
 - **기념일 수정**: 날짜 선택 및 저장
@@ -295,14 +306,14 @@ ALTER TABLE users ADD CONSTRAINT fk_users_couple FOREIGN KEY (couple_id) REFEREN
 - [x] D-Day 표시 화면
 - [x] D-Day 애니메이션 효과
 - [x] 사진 앨범 페이지 (UI)
-- [x] 채팅 페이지 (UI)
+- [x] 일정 캘린더 페이지 (UI)
 - [x] 타임라인 페이지 (UI)
 - [x] 설정 페이지
 - [x] 내비게이션 (Navbar, BottomNavigation)
 - [ ] 여행 기록 페이지
 
 ### Phase 4: 고급 기능
-- [ ] PWA 설정
+- [x] PWA 설정 (manifest.json)
 - [ ] 푸시 알림
 - [ ] 다크모드
 - [ ] 이미지 최적화
@@ -336,7 +347,7 @@ cd backend
 - **Password**: (비어있음)
 
 ### Swagger UI
-- **URL**: `http://localhost:8081/swagger-ui.html`
+- **URL**: `http://localhost:8081/swagger-ui/index.html`
 
 ### 테스트 계정
 모든 계정의 비밀번호는 `123123`입니다.
@@ -372,8 +383,13 @@ cd backend
 
 ### 3. CORS 설정
 - 프론트엔드(`http://localhost:3000`) 허용
-- 쿠키 포함 요청 허용 (`credentials: true`)
+- 쿠키 포함 요청 허용 (`credentials: true`) → 프론트 fetch/axios에서 `credentials: 'include'` 설정 필요
 - 세션 API 공개 접근 허용
+
+### 6. 일정 API/엔티티
+- 테이블: `schedules`, `schedule_reminders`
+- 주요 컬럼: `all_day`, `start_at`, `end_at`, `repeat_rule`, `repeat_until`, `visibility`, `status`
+- 커플 단위 조회: `couple_id` + 기간 인덱스(`idx_schedules_couple_start`)
 
 ### 4. UI/UX
 - 모던하고 깔끔한 디자인
@@ -402,8 +418,9 @@ cd backend
 
 1. ~~**커플 연결 기능**: 초대 코드 기반으로 커플 연결~~ (완료)
 2. ~~**UI/UX 개선**: D-Day 애니메이션, 내비게이션, 고정 헤더/푸터~~ (완료)
-3. ~~**페이지 구현**: 사진, 채팅, 타임라인, 설정 페이지 UI~~ (완료)
-4. **사진 업로드**: 파일 업로드 및 S3 연동
-5. **실시간 채팅**: WebSocket 구현
-6. **여행 기록**: 지도 API 연동
-7. **타임라인**: 통합 추억 뷰 및 데이터 연동
+3. ~~**페이지 구현**: 사진, 일정, 타임라인, 설정 페이지 UI~~ (완료)
+4. ~~**앱 이름**: 마이데이로 확정~~ (완료)
+5. **일정 관리 API**: 일정 CRUD API 구현
+6. **사진 업로드**: 파일 업로드 및 S3 연동
+7. **여행 기록**: 지도 API 연동
+8. **타임라인**: 통합 추억 뷰 및 데이터 연동
